@@ -112,14 +112,14 @@ func (p *PROCESSENTRY32) getModules() []MODULEENTRY32 {
 	
 }
 
-func (m *MemHandler) getProcesses() ([]PROCESSENTRY32, error) {
+func (m *MemHandler) getProcesses() (error) {
 
 
 	handle, _, _ := procCreateToolhelp32Snapshot.Call(
 		0x00000002,
 		2372)
 	if handle < 0 {
-		return nil, syscall.GetLastError()
+		return syscall.GetLastError()
 	}
 	defer procCloseHandle.Call(handle)
 
@@ -129,7 +129,7 @@ func (m *MemHandler) getProcesses() ([]PROCESSENTRY32, error) {
 
 	ret, _, _ := procProcess32First.Call(handle, uintptr(unsafe.Pointer(&entry)))
 	if ret == 0 {
-		return nil, fmt.Errorf("Error retrieving process info.")
+		return fmt.Errorf("Error retrieving process info.")
 	}
 
 	results := make([]PROCESSENTRY32, 0, 50)
@@ -141,6 +141,13 @@ func (m *MemHandler) getProcesses() ([]PROCESSENTRY32, error) {
 		}
 	}
 	//fmt.Println(results2)
-	return results, nil
+	var p Process
+	for _, v := range results {
+		if v.ProcessID != 0 {
+			p.PROCESSENTRY = v
+			m.Processes = append(m.Processes, p)
+		}
+	}
+	return nil
 }
 

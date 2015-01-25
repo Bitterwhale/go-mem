@@ -7,5 +7,9 @@ func main() {
 		Processes: make([]Process, 256),
 	}
 	handler.getProcesses()
-	fmt.Println(handler.Processes[16].getName())
+	for _, v := range handler.Processes{
+		if v.getPid() != 0{
+			fmt.Println(v.getPid())
+		}
+	}
 }
