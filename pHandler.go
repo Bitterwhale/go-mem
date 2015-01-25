@@ -27,6 +27,10 @@ const (
 	MAX_MODULE_NAME32 	= 255
 )
 
+type MemHandler struct {
+	Processes []Process
+}
+
 // PROCESSENTRY32 is the Windows API structure that contains a process's
 // information.
 type PROCESSENTRY32 struct {
@@ -54,13 +58,13 @@ type MODULEENTRY32 struct {
 	szModule 		[MAX_MODULE_NAME32+1]uint16
 	ExeFile         [MAX_PATH]uint16
 
-}
+} 
 
-func getProcessBase (pid uintptr) uint8 {
+func (p *PROCESSENTRY32) BaseAddress() uint8 {
 	var baseAddress uint8
 	handle, _, _ := procCreateToolhelp32Snapshot.Call(
 		0x00000008,
-		pid)
+		uintptr(p.ProcessID))
 	defer procCloseHandle.Call(handle)
 	var entry MODULEENTRY32
 	
@@ -75,74 +79,11 @@ func getProcessBase (pid uintptr) uint8 {
 
 }
 
-
-
-
-
-/**
-func (p *MODULEENTRY32) BaseAddress() string {
-	return string(*p.modBaseAddr)
-}
-*/
-
-// WindowsProcess is an implementation of Process for Windows.
-type WindowsProcess struct {
-	pid  int
-	ppid int
-	exe  string
-}
-
-func (p *WindowsProcess) Pid() int {
-	return p.pid
-}
-
-func (p *WindowsProcess) PPid() int {
-	return p.ppid
-}
-
-func (p *WindowsProcess) Executable() string {
-	return p.exe
-}
-
-func newWindowsProcess(e *PROCESSENTRY32) *WindowsProcess {
-	// Find when the string ends for decoding
-	end := 0
-	for {
-		if e.ExeFile[end] == 0 {
-			break
-		}
-		end++
-	}
-
-	return &WindowsProcess{
-		pid:  int(e.ProcessID),
-		ppid: int(e.ParentProcessID),
-		exe:  syscall.UTF16ToString(e.ExeFile[:end]),
-	}
-}
-
-/**func findProcess(pid int) (Process, error) {
-	ps, err := processes()
-	if err != nil {
-		return nil, err
-	}
-
-	for _, p := range ps {
-		if p.Pid() == pid {
-			return p, nil
-		}
-	}
-
-	return nil, nil
-}*/
-
-
-
-func getProcessModules(pid uintptr) []MODULEENTRY32 {
+func (p *PROCESSENTRY32) getModules() []MODULEENTRY32 {
 	results := make([]MODULEENTRY32, 128)
 	handle, _, _ := procCreateToolhelp32Snapshot.Call(
 		0x00000008,
-		pid)
+		uintptr(p.ProcessID))
 
 	defer procCloseHandle.Call(handle)
 
@@ -164,17 +105,14 @@ func getProcessModules(pid uintptr) []MODULEENTRY32 {
 		if ret == 0 {
 			break
 		}
-		fmt.Println(entry.modBaseAddr)
+		fmt.Println(entry.ModuleID, " : ", entry.modBaseAddr)
 
 	}
 	return results
 	
 }
 
-
-
-
-func processes() ([]PROCESSENTRY32, error) {
+func (m *MemHandler) getProcesses() ([]PROCESSENTRY32, error) {
 
 
 	handle, _, _ := procCreateToolhelp32Snapshot.Call(
