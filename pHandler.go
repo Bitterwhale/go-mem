@@ -79,11 +79,13 @@ func (p *PROCESSENTRY32) BaseAddress() uint8 {
 
 }
 
-func (p *PROCESSENTRY32) getModules() []MODULEENTRY32 {
+
+
+func (p *Process) getModules() {
 	results := make([]MODULEENTRY32, 128)
 	handle, _, _ := procCreateToolhelp32Snapshot.Call(
 		0x00000008,
-		uintptr(p.ProcessID))
+		uintptr(p.getPid()))
 
 	defer procCloseHandle.Call(handle)
 
@@ -95,7 +97,7 @@ func (p *PROCESSENTRY32) getModules() []MODULEENTRY32 {
 
 	ret, _, _ := Module32First.Call(handle, uintptr(unsafe.Pointer(&entry)))
 	if ret == 0 {
-		log.Panic("NO MODULES!?!¤(&/¤&3452))")
+		return//log.Panic("NO MODULES!?!¤(&/¤&3452))")
 	}
 
 
@@ -105,12 +107,17 @@ func (p *PROCESSENTRY32) getModules() []MODULEENTRY32 {
 		if ret == 0 {
 			break
 		}
-		fmt.Println(entry.ModuleID, " : ", entry.modBaseAddr)
+		//fmt.Println(entry.ModuleID, " : ", entry.modBaseAddr)
 
 	}
-	return results
+	p.ModuleList = results
 	
 }
+
+
+
+
+
 
 func (m *MemHandler) getProcesses() (error) {
 

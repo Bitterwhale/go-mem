@@ -12,4 +12,10 @@ func main() {
 			fmt.Println(v.getPid())
 		}
 	}
+
+	handler.Processes[250].getModules()
+	for _, module := range handler.Processes[250].ModuleList{
+		fmt.Println("\t", module.ProcessID)
+
+	}
 }
