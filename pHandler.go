@@ -25,6 +25,8 @@ const (
 	ERROR_NO_MORE_FILES = 0x12
 	MAX_PATH            = 260
 	MAX_MODULE_NAME32 	= 255
+	ACCESS_READ_PROCESSES = 0x00000002
+	ACCESS_READ_MODULES = 0x00000008
 )
 
 type MemHandler struct {
@@ -98,7 +100,7 @@ func (p *PROCESSENTRY32) getName() string {
 func (p *PROCESSENTRY32) BaseAddress() uint8 {
 	var baseAddress uint8
 	handle, _, _ := procCreateToolhelp32Snapshot.Call(
-		0x00000008,
+		ACCESS_READ_MODULES,
 		uintptr(p.ProcessID))
 	defer procCloseHandle.Call(handle)
 	var entry MODULEENTRY32
@@ -119,7 +121,7 @@ func (p *PROCESSENTRY32) BaseAddress() uint8 {
 func (p *Process) getModules() {
 	results := make([]MODULEENTRY32, 128)
 	handle, _, _ := procCreateToolhelp32Snapshot.Call(
-		0x00000008,
+		ACCESS_READ_MODULES,
 		uintptr(p.getPid()))
 
 	defer procCloseHandle.Call(handle)
@@ -158,7 +160,7 @@ func (m *MemHandler) getProcesses() (error) {
 
 
 	handle, _, _ := procCreateToolhelp32Snapshot.Call(
-		0x00000002,
+		ACCESS_READ_PROCESSES,
 		2372)
 	if handle < 0 {
 		return syscall.GetLastError()
