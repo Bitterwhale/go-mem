@@ -72,6 +72,8 @@ func (m *MODULEENTRY32) getName() string {
 	}
 	return str
 }
+
+
 func (m *MODULEENTRY32) getFullPath() string {
 	var str string
 	for _, value := range m.ExeFile {
@@ -82,6 +84,7 @@ func (m *MODULEENTRY32) getFullPath() string {
 	}
 	return str
 }
+
 
 func (p *PROCESSENTRY32) getName() string {
 	var str string
@@ -109,9 +112,9 @@ func (p *PROCESSENTRY32) BaseAddress() uint8 {
 
 	ret, _, _ := Module32First.Call(handle, uintptr(unsafe.Pointer(&entry)))
 	if ret == 0 {
-		log.Panic("?!")
+		fmt.Println("Failed to load first module of process")
 	}
-	fmt.Println(entry.modBaseAddr)
+	//fmt.Println(entry.modBaseAddr)
 	return baseAddress
 
 }
