@@ -7,15 +7,25 @@ func main() {
 		Processes: make([]Process, 256),
 	}
 	handler.getProcesses()
+
+
+	/*
+	 * Dumping processes and their modules for the fun of it.
+	 */
 	for _, v := range handler.Processes{
 		if v.getPid() != 0{
-			fmt.Println(v.getPid())
+			fmt.Println(v.getPid(), ":", v.getName())
 		}
+
+	 	v.getModules()
+		for _, module := range v.ModuleList{
+			if module.ProcessID != 0 {
+				fmt.Println("\t\t", module.getName())
+			}
+	 	}
+
+
+
 	}
 
-	handler.Processes[250].getModules()
-	for _, module := range handler.Processes[250].ModuleList{
-		fmt.Println("\t", module.ProcessID)
-
-	}
 }

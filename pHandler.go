@@ -60,6 +60,41 @@ type MODULEENTRY32 struct {
 
 } 
 
+func (m *MODULEENTRY32) getName() string {
+	var str string
+	for _, value := range m.szModule {
+		if int(value) == 0{
+			break
+		}
+		str += string(int(value))
+	}
+	return str
+}
+func (m *MODULEENTRY32) getFullPath() string {
+	var str string
+	for _, value := range m.ExeFile {
+		if int(value) == 0{
+			break
+		}
+		str += string(int(value))
+	}
+	return str
+}
+
+func (p *PROCESSENTRY32) getName() string {
+	var str string
+	for _, value := range p.ExeFile {
+		if int(value) == 0{
+			break
+		}
+		str += string(int(value))
+	}
+	return str
+}
+
+
+
+
 func (p *PROCESSENTRY32) BaseAddress() uint8 {
 	var baseAddress uint8
 	handle, _, _ := procCreateToolhelp32Snapshot.Call(

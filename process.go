@@ -9,8 +9,7 @@ func (p *Process) getPid() uint32 {
 	return p.PROCESSENTRY.ProcessID
 }
 
-func (p *Process) getName() [260]uint16 {
+func (p *Process) getName() string {
 
-	return p.PROCESSENTRY.ExeFile
-
+	return p.PROCESSENTRY.getName()
 }
