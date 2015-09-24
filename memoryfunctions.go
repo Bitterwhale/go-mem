@@ -21,9 +21,10 @@ var (
  */
 func ReadProcessMemory(process PROCESSENTRY32, address uintptr, buffer *[]byte, size int) {
 	readProcessMemory.Call(
-			process
-
+			process,
+			address,
+			buffer,
+			size
 		)
-
 
 }
